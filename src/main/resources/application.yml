@@ -1,0 +1,32 @@
+server:
+    port: 8081
+spring:
+  cloud:
+    stream:
+      instance-count: 3 #��ǰ�����ߵ��ܵ�ʵ������(Ӱ���Զ�����kafka consumer����=instance-count * concurrency)
+      instance-index: 1 #��ǰʵ��������
+      bindings:
+        myOutputCommodity:  # channel��
+          group: g1  #��ʾ����Ϣֻ����һ�Σ���Ҫ��consumer��partitioned��true������ͬʱʹ�ã���channel���������飬����inbound bindings��Ч����
+          destination: topic_myOutputCommodity  #��Ӧ��topic
+          consumer: ########��������
+            concurrency: 2 #Ĭ�� ��վ����������
+            partitioned: true # (KAFKA��������,��group���ã�)Whether the consumer receives data from a partitioned producer.
+      kafka:
+        binder:
+          brokers: 192.168.8.201,192.168.8.202,192.168.8.203  #A list of brokers to which the Kafka binder will connect.
+          zkNodes: 192.168.8.201,192.168.8.202,192.168.8.203
+          autoCreateTopics: true  #Ĭ��
+          autoAddPartitions: true #Ĭ��false
+          replicationFactor: 1 # Ĭ��1
+        bingings:
+          myOutputCommodity:
+            consumer:
+              autoRebalanceEnabled: true #Ĭ��true���������������������ĳ�Ա֮���Զ�����ƽ��
+              # autoCommitOffset �� �ֶ�ȷ��
+              #������Ӧ��Ϊkafka��AckModeȷ��ģʽ�����autoCommitOffset����Ϊfalse����Ҫ��SPRING������ֶ�ȷ��
+              #�ο� https://docs.spring.io/spring-cloud-stream/docs/Ditmars.SR3/reference/htmlsingle/#_usage_examples
+              autoCommitOffset: true #Ĭ��true
+              autoCommitOnError: false #ֻ��autoCommitOffset����Ϊtrue����Ч
+              enableDlq: false #Ĭ��false, Ĭ������£����´�����ʼ���ת������Ϊerror.<destination>.<group>������
+              #configuration: #Default: Empty map. Map with a key/value pair containing generic Kafka consumer properties.
